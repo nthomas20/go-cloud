@@ -2,28 +2,25 @@ style: github
 template: CHANGELOG.tpl.md
 info:
   title: CHANGELOG
-  repository_url: https://github.com/nthomas20/gostadon-cli
+  repository_url: https://gitea.nthomas20.net/nathaniel/go-cloud
 options:
   commits:
-    filters:
-      Type:
-        - feat
-        - fix
-        - perf
-        - refactor
-        - docs
+    # filters:
+    #   Type:
+    #     - feat
+    #     - fix
+    #     - perf
+    #     - refactor
   commit_groups:
-    title_maps:
-      feat: Features
-      fix: Bug Fixes
-      perf: Performance Improvements
-      refactor: Code Refactoring
-      docs: Docs
+    # title_maps:
+    #   feat: Features
+    #   fix: Bug Fixes
+    #   perf: Performance Improvements
+    #   refactor: Code Refactoring
   header:
-    pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
+    pattern: "^(\\w*)\\:\\s(.*)$"
     pattern_maps:
       - Type
-      - Scope
       - Subject
   notes:
     keywords:
