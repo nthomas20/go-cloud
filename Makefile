@@ -62,7 +62,7 @@ clean:
 	if [ -f bin/${BINARY_WINDOWS} ] ; then rm bin/${BINARY_WINDOWS} ; fi
 	if [ -f bin/${BINARY_MACOS} ] ; then rm bin/${BINARY_MACOS} ; fi
 
-# Generate and push changelog
+# Generate and push changelog ( https://github.com/git-chglog/git-chglog )
 changelog:
 	git pull
 	git-chglog -o CHANGELOG.md
