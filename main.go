@@ -19,6 +19,7 @@ import (
 
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/webdav"
 	"github.com/urfave/cli/v2"
 )
 
@@ -35,6 +36,8 @@ var (
 	runnerChan = make(chan bool)
 	daemonChan = make(chan os.Signal, 1)
 )
+
+// TODO: automatic refresh of config file, every `x` amount of time
 
 func alreadyRunning() (bool, int64) {
 	var (
@@ -74,6 +77,9 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 				Action: func(c *cli.Context) error {
 					// Load configuration
 					// loadEnvVars(c)
+					// Bootstrap Configuration
+					bootstrap.SetupConfiguration()
+					configuration.ReadConfiguration(config)
 
 					if state, pid := alreadyRunning(); state == true {
 						fmt.Println("The service is currently running with PID " + strconv.Itoa(int(pid)))
@@ -132,19 +138,25 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 					// Impossible to run as daemon if app is not logged properly
 					// Check relationship status
 					if os.Args[len(os.Args)-1] == "CHILD_PROCESS" {
+						bootstrap.ConfigDirectory = os.Args[len(os.Args)-2]
+						configuration.ReadConfiguration(config)
 						// Listen in the child process
 						// Launch the termination listener
 						launchTerminationListener()
 
 						err = launchApp(c)
 					} else {
+						// Bootstrap Configuration
+						bootstrap.SetupConfiguration()
+						configuration.ReadConfiguration(config)
+
 						// I am the parent
 						// Check if pid file exists
 						if state, _ := alreadyRunning(); state == true {
 							err = errors.New("Service already running")
 						} else {
 							// Fork and get PID
-							pid, err := syscall.ForkExec(os.Args[0], append(os.Args, []string{"CHILD_PROCESS"}...), &syscall.ProcAttr{Files: []uintptr{0, 1, 2}})
+							pid, err := syscall.ForkExec(os.Args[0], append(os.Args, []string{bootstrap.ConfigDirectory, "CHILD_PROCESS"}...), &syscall.ProcAttr{Files: []uintptr{0, 1, 2}})
 
 							if err != nil {
 								return err
@@ -194,14 +206,11 @@ func launchTerminationListener() {
 }
 
 func launchApp(c *cli.Context) error {
+	webdav.Run()
 	return nil
 }
 
 func main() {
-	// Bootstrap Configuration
-	bootstrap.SetupConfiguration()
-	configuration.ReadConfiguration(config)
-
 	// Manage CLI switches
 	// Setup command routes
 	commands, flags := registerCLI()

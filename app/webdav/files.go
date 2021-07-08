@@ -1,32 +1,28 @@
-// go get golang.org/x/net/webdav
-// go run files.go -openbrowser -http=127.0.0.1:9090
-package main
+package webdav
 
 import (
 	"context"
 	"flag"
-	"net/http"
-	"log"
 	"fmt"
+	"log"
 	"net"
-	"time"
-	"runtime"
+	"net/http"
 	"os"
-	"os/exec"
+	"time"
+
 	"golang.org/x/net/webdav"
 )
 
 var (
-	httpListen  = flag.String("http", "127.0.0.1:8080", "host:port to listen on")
-	openBrowser = flag.Bool("openbrowser", false, "open browser automatically")
-	g_username  = flag.String("username", "admin", "the default username")
-	g_password  = flag.String("password", "password", "the default password")
-	root_folder  = flag.String("root", "./data", "the default password")
+	httpListen = "127.0.0.1:8080"
+	username   = "admin"
+	password   = "password"
+	rootFolder = "./data"
 )
 
 var (
 	handler = &webdav.Handler{
-		FileSystem: webdav.Dir(*root_folder),
+		FileSystem: webdav.Dir(rootFolder),
 		LockSystem: webdav.NewMemLS(),
 	}
 )
@@ -57,23 +53,24 @@ func (w responseWriterNoBody) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
-func main() {
+// Run : Run the webdav server
+func Run() {
 	flag.Parse()
 
-	if _, err := os.Stat(*root_folder); os.IsNotExist(err) {
-		os.Mkdir(*root_folder, 0755)
+	if _, err := os.Stat(rootFolder); os.IsNotExist(err) {
+		os.Mkdir(rootFolder, 0755)
 	}
 
 	server := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-		username, password, authOK := r.BasicAuth()
+		authUsername, authPassword, authOK := r.BasicAuth()
 
 		if authOK == false {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
 
-		if username != *g_username || password != *g_password {
+		if authUsername != username || authPassword != password {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
@@ -92,16 +89,16 @@ func main() {
 		handler.ServeHTTP(w, r)
 	})
 
-	listener, err := net.Listen("tcp", *httpListen)
+	listener, err := net.Listen("tcp", httpListen)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	go func() {
 		fmt.Println("Started")
-		url := "http://" + *httpListen
-		if waitServer(url) && *openBrowser && startBrowser(url) {
-			log.Printf("A browser window should open. If not, please visit %s", url)
+		url := "http://" + httpListen
+		if waitServer(url) {
+			log.Printf("Please visit %s", url)
 		} else {
 			log.Printf("Please open your web browser and visit %s", url)
 		}
@@ -123,21 +120,4 @@ func waitServer(url string) bool {
 		tries--
 	}
 	return false
-}
-
-// startBrowser tries to open the URL in a browser, and returns
-// whether it succeed.
-func startBrowser(url string) bool {
-	// try to start the browser
-	var args []string
-	switch runtime.GOOS {
-	case "darwin":
-		args = []string{"open"}
-	case "windows":
-		args = []string{"cmd", "/c", "start"}
-	default:
-		args = []string{"xdg-open"}
-	}
-	cmd := exec.Command(args[0], append(args[1:], url)...)
-	return cmd.Start() == nil
 }

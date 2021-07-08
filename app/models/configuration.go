@@ -20,10 +20,16 @@ type LogConfiguration struct {
 	MaxFiles int    `json:"max_files"`
 }
 
+// PasswordConfiguration : Account Password Configuration
+type PasswordConfiguration struct {
+	Password    string `json:"password"`
+	Description string `json:"description"`
+}
+
 // AccountConfiguration : Account Profile Configuration
 type AccountConfiguration struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	IsAdmin  bool   `json:"admin"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Passwords []PasswordConfiguration
+	IsAdmin   bool `json:"admin"`
 }
