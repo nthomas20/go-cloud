@@ -17,6 +17,8 @@ import (
 	"syscall"
 	"time"
 
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,6 +27,7 @@ var (
 	buildDate      string
 	appName        = "go-cloud"
 	appDescription = "WebDav Server"
+	config         = configuration.NewConfiguration()
 
 	portInternal = "8080"
 	pidFilename  = ".go-cloud.pid"
@@ -195,6 +198,10 @@ func launchApp(c *cli.Context) error {
 }
 
 func main() {
+	// Bootstrap Configuration
+	bootstrap.SetupConfiguration()
+	configuration.ReadConfiguration(config)
+
 	// Manage CLI switches
 	// Setup command routes
 	commands, flags := registerCLI()
