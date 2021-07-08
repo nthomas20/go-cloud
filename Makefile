@@ -73,8 +73,8 @@ changelog:
 # Builds the project ( https://www.digitalocean.com/community/tutorials/how-to-build-go-executables-for-multiple-platforms-on-ubuntu-16-04 )
 build: clean
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build ${LDFLAGS} -o bin/${BINARY_LINUX}
-	env GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build ${LDFLAGS} -o bin/${BINARY_WINDOWS}
-	env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build ${LDFLAGS} -o bin/${BINARY_MACOS}
+	# env GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build ${LDFLAGS} -o bin/${BINARY_WINDOWS}
+	# env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build ${LDFLAGS} -o bin/${BINARY_MACOS}
 
 # Check our requirements
 reqcheck:
