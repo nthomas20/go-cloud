@@ -15,20 +15,34 @@ var (
 	HomeDirectory string
 	// ConfigDirectory : Main Configuration Directory
 	ConfigDirectory string
+	// ConfigFilename : Configuration Filename
+	ConfigFilename = "/config.yaml"
 )
 
 // SetupConfiguration : Make sure our main configuration directory is set
 func SetupConfiguration() {
-	// Get the home directory
-	homeDirectory, _ := os.UserHomeDir()
+	// Check if there is a config file in the current directory, if so -- it wins!
+	if dir, err := os.Getwd(); err == nil {
+		if _, err := os.Stat(dir + ConfigFilename); err == nil {
+			ConfigDirectory = dir
 
-	ConfigDirectory = homeDirectory + "/.go-cloud"
-
-	_, err := os.Stat(ConfigDirectory)
-	if os.IsNotExist(err) {
-		// Create directory
-		if err := os.Mkdir(ConfigDirectory, os.ModePerm); err != nil {
-			log.Fatal("Could not create configuration directory:", ConfigDirectory)
+			return
 		}
+	}
+
+	// Get the home directory
+	if homeDirectory, err := os.UserHomeDir(); err == nil {
+		ConfigDirectory = homeDirectory + "/.go-cloud"
+
+		_, err := os.Stat(ConfigDirectory)
+		if os.IsNotExist(err) {
+			// Create directory
+			if err := os.Mkdir(ConfigDirectory, os.ModePerm); err != nil {
+				log.Fatalln("Could not create configuration directory:", ConfigDirectory)
+			}
+		}
+	} else {
+		log.Fatalln("Could not determine user's home directory")
+
 	}
 }

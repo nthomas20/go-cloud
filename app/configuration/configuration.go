@@ -16,10 +16,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	configFilename = "/config.yaml"
-)
-
 // NewConfiguration : Generate a New Configuration file with filled in defaults
 func NewConfiguration() *models.Configuration {
 	config := models.Configuration{
@@ -41,7 +37,7 @@ func ReadConfiguration(config *models.Configuration) error {
 	var (
 		validConfiguration = true
 	)
-	configFile := bootstrap.ConfigDirectory + configFilename
+	configFile := bootstrap.ConfigDirectory + bootstrap.ConfigFilename
 
 	fileBytes, err := ioutil.ReadFile(configFile)
 
@@ -70,7 +66,7 @@ func ReadConfiguration(config *models.Configuration) error {
 
 // WriteConfiguration : Write a Configuration structure to disk
 func WriteConfiguration(config *models.Configuration) error {
-	configFile := bootstrap.ConfigDirectory + configFilename
+	configFile := bootstrap.ConfigDirectory + bootstrap.ConfigFilename
 
 	fileBytes, err := yaml.Marshal(config)
 
