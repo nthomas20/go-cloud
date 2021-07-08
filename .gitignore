@@ -1,0 +1,34 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of coverage
+*.out
+coverage.txt
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Exclude directory navigation scripts
+.entryrc
+.exitrc
+
+# Custom IDE Settings
+.vscode/
+__debug*
+
+# Ignore local bin directory
+/bin
+
+# Def don't store the .env file
+.env
+
+# Ignore logs directory
+/logs/
+*.log
