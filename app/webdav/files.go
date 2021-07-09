@@ -14,21 +14,21 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/models"
 	"golang.org/x/net/webdav"
 )
 
 var (
 	httpListen = "127.0.0.1:8080"
-	username   = "admin"
-	password   = "password"
-	rootFolder = "./data"
+	// username   = "admin"
+	// password   = "password"
+	// rootFolder = "./data"
 )
 
 var (
 	handler = &webdav.Handler{
-		FileSystem: webdav.Dir(rootFolder),
+		// FileSystem: webdav.Dir(rootFolder),
 		LockSystem: webdav.NewMemLS(),
 	}
 )
@@ -60,26 +60,35 @@ func (w responseWriterNoBody) WriteHeader(statusCode int) {
 }
 
 // Run : Run the webdav server
-func Run() {
+func Run(config *models.Configuration) {
 	flag.Parse()
 
-	if _, err := os.Stat(rootFolder); os.IsNotExist(err) {
-		os.Mkdir(rootFolder, 0755)
-	}
+	// if _, err := os.Stat(rootFolder); os.IsNotExist(err) {
+	// 	os.Mkdir(rootFolder, 0755)
+	// }
 
 	server := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-		authUsername, authPassword, authOK := r.BasicAuth()
+		username, password, authOK := r.BasicAuth()
 
 		if authOK == false {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
 
-		if authUsername != username || authPassword != password {
+		// Check username and password against available configuration
+		if _, found := config.Accounts[username]; found == false {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
+
+		if _, found := config.Accounts[username].Passwords[password]; found == false {
+			http.Error(w, "Not authorized", 401)
+			return
+		}
+
+		// Configure directory for user
+		handler.FileSystem = webdav.Dir(config.Accounts[username].RootDirectory)
 
 		if r.Method == http.MethodHead {
 			w = newResponseWriterNoBody(w)

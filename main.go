@@ -201,7 +201,7 @@ func launchTerminationListener() {
 }
 
 func launchApp(c *cli.Context) error {
-	webdav.Run()
+	webdav.Run(config)
 
 	// Run forever
 	_ = <-runnerChan
