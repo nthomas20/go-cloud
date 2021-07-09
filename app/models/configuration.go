@@ -13,6 +13,7 @@ import (
 // Revision 1
 type Configuration struct {
 	Revision int                             `json:"revision"`
+	Port     string                          `json:"port"`
 	Logging  map[string]LogConfiguration     `json:"logging"`
 	Accounts map[string]AccountConfiguration `json:"accounts"`
 }

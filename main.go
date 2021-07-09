@@ -17,10 +17,10 @@ import (
 	"syscall"
 	"time"
 
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/api"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/cmd"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
-	"gitea.nthomas20.net/nathaniel/go-cloud/app/webdav"
 	"github.com/urfave/cli/v2"
 )
 
@@ -201,12 +201,35 @@ func launchTerminationListener() {
 }
 
 func launchApp(c *cli.Context) error {
-	webdav.Run(config)
+	// webdav.Run(config)
 
 	// Run forever
-	_ = <-runnerChan
+	// _ = <-runnerChan
 
-	return nil
+	// Setup our app
+	var app api.API
+
+	app = &api.Configuration{
+		Configuration: config,
+		Version:       version,
+		BuildDate:     buildDate,
+	}
+
+	// We follow this pattern to plan ahead to allow for control and internal status check listeners
+	if success := app.Run(); success == true {
+		// Give us a moment to bind to the port, or exit
+		time.Sleep(2 * time.Second)
+
+		log.Println("Service Started. Listening on port " + config.Port)
+
+		// Run forever
+		_ = <-runnerChan
+
+		return nil
+	}
+
+	log.Println("Could not launch service")
+	return errors.New("Could not launch service")
 }
 
 func main() {

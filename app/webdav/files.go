@@ -76,6 +76,8 @@ func Run(config *models.Configuration) {
 			return
 		}
 
+		fmt.Println(&config)
+
 		// Check username and password against available configuration
 		if _, found := config.Accounts[username]; found == false {
 			http.Error(w, "Not authorized", 401)
@@ -102,6 +104,8 @@ func Run(config *models.Configuration) {
 		}
 
 		handler.ServeHTTP(w, r)
+
+		fmt.Println("-------------- after serve")
 	})
 
 	go func() {
