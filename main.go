@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/cmd"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/webdav"
 	"github.com/urfave/cli/v2"
@@ -58,7 +59,7 @@ func alreadyRunning() (bool, int64) {
 }
 
 func registerCLI() ([]*cli.Command, []cli.Flag) {
-	return []*cli.Command{
+	return append(cmd.Commands(), []*cli.Command{
 			{
 				Name:    "version",
 				Aliases: []string{"v"},
@@ -130,12 +131,6 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 						err error
 					)
 
-					// Load configuration
-					// if err = loadEnvVars(c); err != nil {
-					// 	return err
-					// }
-
-					// Impossible to run as daemon if app is not logged properly
 					// Check relationship status
 					if os.Args[len(os.Args)-1] == "CHILD_PROCESS" {
 						bootstrap.ConfigDirectory = os.Args[len(os.Args)-2]
@@ -173,7 +168,7 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 
 				},
 			},
-		},
+		}...),
 
 		[]cli.Flag{}
 }
