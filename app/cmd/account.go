@@ -1,5 +1,5 @@
 /*
- * Filename: configuration.go
+ * Filename: account.go
  * Author: Nathaniel Thomas
  */
 
