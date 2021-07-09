@@ -40,8 +40,6 @@ func addPassword(c *cli.Context) error {
 	}
 
 	// Add new password
-	fmt.Println(config.Accounts[username])
-
 	config.Accounts[username].Passwords[password] = models.PasswordConfiguration{
 		Password:    password,
 		Description: description,
@@ -88,6 +86,10 @@ func deletePassword(c *cli.Context) error {
 	}
 
 	fmt.Println("Account password deleted")
+
+	if len(config.Accounts[username].Passwords) == 0 {
+		fmt.Println("No passwords set for account " + username)
+	}
 
 	return nil
 }
