@@ -1,5 +1,5 @@
 /*
- * Filename: configuration.go
+ * Filename: password.go
  * Author: Nathaniel Thomas
  */
 
