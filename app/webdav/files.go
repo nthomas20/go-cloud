@@ -1,3 +1,10 @@
+/*
+ * original file: https://gist.github.com/darcyliu/336f4b0dd573cda2f5df339a74db0446
+ * this file has been modified from original to remove cli flag processing and browser opening
+ * TODO: Take lessons and implementation from this file and work into a larger router system using fasthttp/fasthttprouter/reuseport, and improve as-needed
+ * No SSL will be managed, any SSL communications will be handled via reverse proxy SSL termination and certificate management
+ */
+
 package webdav
 
 import (
@@ -8,7 +15,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"time"
 
 	"golang.org/x/net/webdav"
 )
@@ -89,35 +95,18 @@ func Run() {
 		handler.ServeHTTP(w, r)
 	})
 
-	listener, err := net.Listen("tcp", httpListen)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	go func() {
+		listener, err := net.Listen("tcp", httpListen)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		fmt.Println("Started")
 		url := "http://" + httpListen
-		if waitServer(url) {
-			log.Printf("Please visit %s", url)
-		} else {
-			log.Printf("Please open your web browser and visit %s", url)
+		log.Printf("Please visit %s", url)
+
+		if err = http.Serve(listener, server); err != nil {
+			log.Fatalln("Error in http server")
 		}
 	}()
-	log.Fatal(http.Serve(listener, server), nil)
-}
-
-// waitServer waits some time for the http Server to start
-// serving url. The return value reports whether it starts.
-func waitServer(url string) bool {
-	tries := 20
-	for tries > 0 {
-		resp, err := http.Get(url)
-		if err == nil {
-			resp.Body.Close()
-			return true
-		}
-		time.Sleep(100 * time.Millisecond)
-		tries--
-	}
-	return false
 }

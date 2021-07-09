@@ -5,6 +5,10 @@
 
 package models
 
+import (
+	"time"
+)
+
 // Configuration : Application Configuration File Sructure
 // Revision 1
 type Configuration struct {
@@ -22,14 +26,16 @@ type LogConfiguration struct {
 
 // PasswordConfiguration : Account Password Configuration
 type PasswordConfiguration struct {
-	Password    string `json:"password"`
-	Description string `json:"description"`
+	Password    string    `json:"password"`
+	Description string    `json:"description"`
+	LastUsed    time.Time `json:"last_used"`
 }
 
 // AccountConfiguration : Account Profile Configuration
 type AccountConfiguration struct {
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Passwords []PasswordConfiguration
-	IsAdmin   bool `json:"admin"`
+	Username      string                  `json:"username"`
+	Email         string                  `json:"email"`
+	Passwords     []PasswordConfiguration `json:"passwords"`
+	IsAdmin       bool                    `json:"admin"`
+	RootDirectory string                  `json:"root_dir"`
 }
