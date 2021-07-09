@@ -5,5 +5,6 @@ $ make build
 $ bin/go-cloud help
 $ bin/go-cloud start
 $ bin/go-cloud stop
+$ bin/go-cloud account add -h
 ```
 

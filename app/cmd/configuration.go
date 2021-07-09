@@ -11,6 +11,35 @@ import (
 
 // Commands : Return the full set of registered commands
 func Commands() []*cli.Command {
+	flags := map[string]cli.Flag{
+		"admin": &cli.BoolFlag{
+			Name:  "admin",
+			Usage: "Specify administrator privileges [optional]",
+			Value: false,
+		},
+		"description": &cli.StringFlag{
+			Name:  "description",
+			Value: "",
+			Usage: "Specify description [optional]",
+		},
+		"directory": &cli.StringFlag{
+			Name:  "directory",
+			Usage: "Specify directory path (e.g. /var/data/webdav)",
+		},
+		"email": &cli.StringFlag{
+			Name:  "email",
+			Usage: "Specify email",
+		},
+		"password": &cli.StringFlag{
+			Name:  "password",
+			Usage: "Specify password",
+		},
+		"username": &cli.StringFlag{
+			Name:  "username",
+			Usage: "Specify username",
+		},
+	}
+
 	return []*cli.Command{
 		// Account Management
 		{
@@ -25,6 +54,12 @@ func Commands() []*cli.Command {
 					Action: func(c *cli.Context) error {
 						return nil
 					},
+					Flags: []cli.Flag{
+						flags["username"],
+						flags["email"],
+						flags["directory"],
+						flags["admin"],
+					},
 				},
 				{
 					Name:    "delete",
@@ -32,6 +67,9 @@ func Commands() []*cli.Command {
 					Aliases: []string{"d"},
 					Action: func(c *cli.Context) error {
 						return nil
+					},
+					Flags: []cli.Flag{
+						flags["username"],
 					},
 				},
 			},
@@ -49,6 +87,11 @@ func Commands() []*cli.Command {
 					Action: func(c *cli.Context) error {
 						return nil
 					},
+					Flags: []cli.Flag{
+						flags["username"],
+						flags["password"],
+						flags["description"],
+					},
 				},
 				{
 					Name:    "delete",
@@ -56,6 +99,10 @@ func Commands() []*cli.Command {
 					Aliases: []string{"d"},
 					Action: func(c *cli.Context) error {
 						return nil
+					},
+					Flags: []cli.Flag{
+						flags["username"],
+						flags["password"],
 					},
 				},
 			},
