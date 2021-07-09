@@ -23,8 +23,9 @@ coverage.txt
 .vscode/
 __debug*
 
-# Ignore local bin directory
+# Ignore local bin directory and pif files
 /bin
+*.pid
 
 # Def don't store the .env file
 .env
