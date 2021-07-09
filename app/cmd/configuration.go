@@ -89,9 +89,7 @@ func Commands() []*cli.Command {
 					Name:    "add",
 					Usage:   "Add an account password",
 					Aliases: []string{"a"},
-					Action: func(c *cli.Context) error {
-						return nil
-					},
+					Action:  addPassword,
 					Flags: []cli.Flag{
 						flags["username"],
 						flags["password"],
@@ -102,9 +100,7 @@ func Commands() []*cli.Command {
 					Name:    "delete",
 					Usage:   "Delete an account password",
 					Aliases: []string{"d"},
-					Action: func(c *cli.Context) error {
-						return nil
-					},
+					Action:  deletePassword,
 					Flags: []cli.Flag{
 						flags["username"],
 						flags["password"],

@@ -33,10 +33,10 @@ type PasswordConfiguration struct {
 
 // AccountConfiguration : Account Profile Configuration
 type AccountConfiguration struct {
-	Username      string                  `json:"username"`
-	Email         string                  `json:"email"`
-	Passwords     []PasswordConfiguration `json:"passwords"`
-	IsActive      bool                    `json:"active"`
-	IsAdmin       bool                    `json:"admin"`
-	RootDirectory string                  `json:"root_dir"`
+	Username      string                           `json:"username"`
+	Email         string                           `json:"email"`
+	Passwords     map[string]PasswordConfiguration `json:"passwords"`
+	IsActive      bool                             `json:"active"`
+	IsAdmin       bool                             `json:"admin"`
+	RootDirectory string                           `json:"root_dir"`
 }
