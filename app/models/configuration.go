@@ -36,6 +36,7 @@ type AccountConfiguration struct {
 	Username      string                  `json:"username"`
 	Email         string                  `json:"email"`
 	Passwords     []PasswordConfiguration `json:"passwords"`
+	IsActive      bool                    `json:"active"`
 	IsAdmin       bool                    `json:"admin"`
 	RootDirectory string                  `json:"root_dir"`
 }

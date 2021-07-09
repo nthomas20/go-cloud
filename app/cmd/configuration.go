@@ -18,25 +18,30 @@ func Commands() []*cli.Command {
 			Value: false,
 		},
 		"description": &cli.StringFlag{
-			Name:  "description",
-			Value: "",
-			Usage: "Specify description [optional]",
+			Name:    "description",
+			Aliases: []string{"desc"},
+			Value:   "",
+			Usage:   "Specify description [optional]",
 		},
 		"directory": &cli.StringFlag{
-			Name:  "directory",
-			Usage: "Specify directory path (e.g. /var/data/webdav)",
+			Name:    "directory",
+			Aliases: []string{"dir"},
+			Usage:   "Specify directory path (e.g. /var/data/webdav)",
 		},
 		"email": &cli.StringFlag{
-			Name:  "email",
-			Usage: "Specify email",
+			Name:    "email",
+			Aliases: []string{"e"},
+			Usage:   "Specify email",
 		},
 		"password": &cli.StringFlag{
-			Name:  "password",
-			Usage: "Specify password",
+			Name:    "password",
+			Aliases: []string{"p"},
+			Usage:   "Specify password",
 		},
 		"username": &cli.StringFlag{
-			Name:  "username",
-			Usage: "Specify username",
+			Name:    "username",
+			Aliases: []string{"u"},
+			Usage:   "Specify username",
 		},
 	}
 
