@@ -6,7 +6,6 @@
 package jobs
 
 import (
-	"fmt"
 	"time"
 
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
@@ -19,14 +18,7 @@ func RefreshConfiguration(config *models.Configuration, frequency time.Duration)
 		for {
 			time.Sleep(frequency)
 
-			// newConfig := configuration.NewConfiguration()
-
 			configuration.ReadConfiguration(config)
-
-			// Re-assign
-			// config = newConfig
-
-			fmt.Println("CONFIG READ", &config)
 		}
 	}()
 }

@@ -21,6 +21,7 @@ import (
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/cmd"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/jobs"
 	"github.com/urfave/cli/v2"
 )
 
@@ -209,6 +210,9 @@ func launchApp(c *cli.Context) error {
 		Version:       version,
 		BuildDate:     buildDate,
 	}
+
+	// Automatically reload configuration
+	jobs.RefreshConfiguration(config, time.Duration(time.Second*60))
 
 	// We follow this pattern to plan ahead to allow for control and internal status check listeners
 	if success := app.Run(); success == true {
