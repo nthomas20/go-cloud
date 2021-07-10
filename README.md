@@ -77,3 +77,15 @@ $ bin/go-cloud password delete --username ${username} --password ${password}
 ```
 
 
+
+# webdav
+
+The webdav protocol provides file and directory services. The endpoint can be easily mounted in most operating systems. The default port `8080` is used at this time. Currently there is no configuration option to change this port (it's coming!) so you'll need to edit the `config.yaml` file to change it.
+
+There are 2 webdav endpoints supported with no difference between them. If we assume `localhost`, the first mount point is:
+* `localhost:8080/webdav/`
+
+The second mount point reflects nextcloud's webdav interface at:
+* `localhost:8080/remote.php/dav/files/${USERNAME}/`
+
+In the case of nextcloud endpoint compatibility `${USERNAME}` must match the logged in user.
