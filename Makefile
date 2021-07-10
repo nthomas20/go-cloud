@@ -32,8 +32,8 @@ all: build
 # Tests the project
 test:
 	env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go test ./... ${LDFLAGS}
-	env GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go test ./... ${LDFLAGS}
-	env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go test ./... ${LDFLAGS}
+	# env GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go test ./... ${LDFLAGS}
+	# env GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go test ./... ${LDFLAGS}
 
 # Tests the project linux-only and upload coverage report
 coverage:
@@ -58,9 +58,8 @@ install-dev-dependencies: clean
 clean:
 	if [ -f coverage.txt ] ; then rm coverage.txt ; fi
 	if [ -f bin/${BINARY_LINUX} ] ; then rm bin/${BINARY_LINUX} ; fi
-	if [ -f bin/${BINARY_SNAP} ] ; then rm bin/${BINARY_SNAP} ; fi
-	if [ -f bin/${BINARY_WINDOWS} ] ; then rm bin/${BINARY_WINDOWS} ; fi
-	if [ -f bin/${BINARY_MACOS} ] ; then rm bin/${BINARY_MACOS} ; fi
+	# if [ -f bin/${BINARY_WINDOWS} ] ; then rm bin/${BINARY_WINDOWS} ; fi
+	# if [ -f bin/${BINARY_MACOS} ] ; then rm bin/${BINARY_MACOS} ; fi
 
 # Generate and push changelog ( https://github.com/git-chglog/git-chglog )
 changelog:

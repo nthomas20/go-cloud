@@ -1,10 +1,73 @@
-Basic cli components built-around webdav server script, thanks darcy! https://gist.github.com/darcyliu/336f4b0dd573cda2f5df339a74db0446
+![free logo from freelogodesign.org](./img/56928cea69e34e27b2eb76d4eabf81a1.png "go-cloud logo")
 
-```
+# Introduction
+go-cloud aims to provide cloud functionality using established open protocols. Inspiration for this project started with webdav protocol and discovering [this gist](https://gist.github.com/darcyliu/336f4b0dd573cda2f5df339a74db0446) -- thanks darcyliu!
+
+# Installation
+
+## Requirements
+
+At this point, this project has only been tested on Ubuntu-based 21.04 distributions
+
+* go version 1.16+
+
+## Build
+
+After cloning the repository, execute the following to build
+
+```bash
 $ make build
-$ bin/go-cloud help
-$ bin/go-cloud start
-$ bin/go-cloud stop
-$ bin/go-cloud account add -h
 ```
+
+# Execution
+The goal with this project is to not require editing any configuration file by hand. Additionally, restarting the service should be required only in a small handful of configuration changes (e.g. port change)
+
+When launching the application, it will fork a process and begin executing in the background. Configuration changes will be refreshed every 60 seconds.
+
+## Starting the service
+
+Assuming executing in the root directory of the repository after build
+
+```bash
+$ bin/go-cloud start
+```
+
+## Stopping the service
+
+Assuming executing in the root directory of the repository after build
+
+```bash
+$ bin/go-cloud stop
+```
+
+## CLI Configuration
+
+Account configurations may be made via CLI commands in real-time and will be refreshed every 60 seconds.
+
+Replace `${...}` with their appropriate values
+
+### Adding an account
+
+```bash
+$ bin/go-cloud account add --username ${username} --email ${email} --directory ${webdav_directory}
+```
+
+### Deleting an account
+
+```bash
+$ bin/go-cloud account delete --username ${username}
+```
+
+### Adding a password to an account
+
+```bash
+$ bin/go-cloud password add --username ${username} --password ${password} --description ${description}
+```
+
+### Deleting a password from an account
+
+```bash
+$ bin/go-cloud password delete --username ${username} --password ${password}
+```
+
 
