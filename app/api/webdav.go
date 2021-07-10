@@ -81,7 +81,6 @@ func basicAuth(ctx *fasthttp.RequestCtx) (string, string, error) {
 	}
 
 	// Request Basic Authentication otherwise
-	ctx.Response.Header.Add("WWW-Authenticate", "Basic realm=Restricted")
 	ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
 
 	return "", "", errors.New("invalid or missing authorization")
@@ -98,7 +97,7 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 
 	fmt.Println(string(ctx.Request.Header.Method()), filepath)
 
-	// Pull the
+	ctx.Response.Header.Add("WWW-Authenticate", "Basic realm=Restricted")
 
 	if username, password, err := basicAuth(ctx); err == nil {
 		// Check username and password against available configuration
@@ -120,9 +119,15 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		// Get file/directory info
 		info, err := handler.FileSystem.Stat(context.TODO(), string(filepath))
 
-		if err != nil {
+		fmt.Println("-=-=-=-=-=-=-=", filepath, info)
+
+		if info == nil {
+			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusNotFound), fasthttp.StatusNotFound)
+			return
+		} else if err != nil {
 			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusInternalServerError), fasthttp.StatusInternalServerError)
 			fmt.Println(err)
+			return
 		}
 
 		// Manage filename and directory situation
@@ -159,7 +164,10 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		} else {
 			// Set the webdav server information back to the actual http response
 			ctx.Response.SetStatusCode(webdavResponse.StatusCode())
-			ctx.Response.SetBody(webdavResponse.Body())
+
+			if string(ctx.Request.Header.Method()) != fasthttp.MethodHead {
+				ctx.Response.SetBody(webdavResponse.Body())
+			}
 
 			for k, v := range map[string]string{
 				fasthttp.HeaderContentType:           webdavResponse.Header().Get(fasthttp.HeaderContentType),
@@ -168,14 +176,14 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 				fasthttp.HeaderCacheControl:          "no-store, no-cache, must-revalidate",
 				fasthttp.HeaderPragma:                "no-cache",
 				fasthttp.HeaderContentSecurityPolicy: "default-src 'none';",
-				fasthttp.HeaderLastModified:          webdavResponse.Header().Get(fasthttp.HeaderLastModified),
-				fasthttp.HeaderETag:                  webdavResponse.Header().Get(fasthttp.HeaderETag),
 			} {
 				ctx.Response.Header.Set(k, v)
 			}
 
 			// If it's a file, add the following
 			if filename != "" {
+				ctx.Response.Header.Set(fasthttp.HeaderETag, webdavResponse.Header().Get(fasthttp.HeaderETag))
+				ctx.Response.Header.Set(fasthttp.HeaderLastModified, webdavResponse.Header().Get(fasthttp.HeaderLastModified))
 				ctx.Response.Header.Set(fasthttp.HeaderContentDisposition, `attachment; filename="`+filename+`"`)
 				ctx.Response.Header.Set("filename", `"`+filename+`"`)
 			}

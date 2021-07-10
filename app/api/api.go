@@ -79,7 +79,8 @@ func (config *Configuration) Run() bool {
 	// Launch our listener!
 	go func() {
 		// Trigger compression handler
-		handler := fasthttp.CompressHandler(r.Handler)
+		// handler := fasthttp.CompressHandler(r.Handler)
+		handler := r.Handler
 
 		ln, err := reuseport.Listen("tcp4", ":"+config.Configuration.Port)
 		if err != nil {
