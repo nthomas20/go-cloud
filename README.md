@@ -3,6 +3,8 @@
 # Introduction
 go-cloud aims to provide cloud functionality using established open protocols. Inspiration for this project started with webdav protocol and discovering [this gist](https://gist.github.com/darcyliu/336f4b0dd573cda2f5df339a74db0446) -- thanks darcyliu!
 
+Currently webdav functionality is provided via google's [webdav module](https://pkg.go.dev/golang.org/x/net/webdav), in the future a native module may be created #dreams
+
 # Installation
 
 ## Requirements
