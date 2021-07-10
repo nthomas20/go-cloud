@@ -201,12 +201,7 @@ func launchTerminationListener() {
 }
 
 func launchApp(c *cli.Context) error {
-	// webdav.Run(config)
-
-	// Run forever
-	// _ = <-runnerChan
-
-	// Setup our app
+	// Setup the app
 	var app api.API
 
 	app = &api.Configuration{
@@ -230,8 +225,6 @@ func launchApp(c *cli.Context) error {
 
 	log.Println("Could not launch service")
 	return errors.New("Could not launch service")
-
-	// return nil
 }
 
 func main() {
