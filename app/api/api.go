@@ -38,9 +38,30 @@ func trackPrefix(prefix string, next fasthttprouter.Handle) fasthttprouter.Handl
 	})
 }
 
+func cors(next fasthttprouter.Handle) fasthttprouter.Handle {
+	var (
+		corsAllowHeaders     = "authorization"
+		corsAllowMethods     = "HEAD,GET,POST,PUT,DELETE,OPTIONS,PROPFIND,MKCOL,MOVE,LOCK,UNLOCK"
+		corsAllowOrigin      = "*"
+		corsAllowCredentials = "true"
+	)
+
+	return fasthttprouter.Handle(func(ctx *fasthttp.RequestCtx, params fasthttprouter.Params) {
+		ctx.Response.Header.Set("Access-Control-Allow-Credentials", corsAllowCredentials)
+		ctx.Response.Header.Set("Access-Control-Allow-Headers", corsAllowHeaders)
+		ctx.Response.Header.Set("Access-Control-Allow-Methods", corsAllowMethods)
+		ctx.Response.Header.Set("Access-Control-Allow-Origin", corsAllowOrigin)
+
+		// Call the next step
+		next(ctx, params)
+	})
+}
+
 func (config *Configuration) setupRouter() *fasthttprouter.Router {
 	// Configure our Router
 	r := fasthttprouter.New()
+	r.RedirectFixedPath = false
+	r.RedirectTrailingSlash = false
 
 	// Configure our GET method routes
 	// r.GET("/", index)
@@ -49,6 +70,7 @@ func (config *Configuration) setupRouter() *fasthttprouter.Router {
 	// r.GET("/version", config.version)
 
 	// go-cloud and nextcloud compatible webdav
+	// https://cs.opensource.google/go/x/net/+/04defd46:webdav/webdav.go;l=42
 	for _, prefix := range []string{"/webdav", "/remote.php/dav/files/:username"} {
 		route := prefix + "/*filepath"
 
@@ -59,7 +81,9 @@ func (config *Configuration) setupRouter() *fasthttprouter.Router {
 		r.OPTIONS(route, trackPrefix(prefix, config.webdav))
 		r.DELETE(route, trackPrefix(prefix, config.webdav))
 		r.Handle("PROPFIND", route, trackPrefix(prefix, config.webdav))
+		r.Handle("PROPPATCH", route, trackPrefix(prefix, config.webdav))
 		r.Handle("MKCOL", route, trackPrefix(prefix, config.webdav))
+		r.Handle("COPY", route, trackPrefix(prefix, config.webdav))
 		r.Handle("MOVE", route, trackPrefix(prefix, config.webdav))
 		r.Handle("LOCK", route, trackPrefix(prefix, config.webdav))
 		r.Handle("UNLOCK", route, trackPrefix(prefix, config.webdav))

@@ -68,9 +68,7 @@ func Run(config *models.Configuration) {
 	// }
 
 	server := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Method, r.URL.Path)
-		fmt.Println(r)
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		w.Header().Set("WWW-Authenticate", `Basic realm=Restricted`)
 		username, password, authOK := r.BasicAuth()
 
 		if authOK == false {

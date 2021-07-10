@@ -16,6 +16,8 @@ import (
 	"net/http"
 	"strings"
 
+	path "path/filepath"
+
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"github.com/valyala/fasthttprouter"
@@ -81,6 +83,7 @@ func basicAuth(ctx *fasthttp.RequestCtx) (string, string, error) {
 	}
 
 	// Request Basic Authentication otherwise
+	ctx.Response.Header.Add("www-authenticate", `Basic realm=Restricted`)
 	ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
 
 	return "", "", errors.New("invalid or missing authorization")
@@ -90,12 +93,10 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 	var (
 		webdavResponse netHTTPResponseWriter
 		webdavRequest  http.Request
-		filepath       = params.ByName("filepath")
-		filename       = ""
-		prefix         = string(ctx.Request.Header.Peek("x-webdav-prefix"))
+		filepath       string = params.ByName("filepath")
+		filename              = ""
+		prefix         string
 	)
-
-	fmt.Println(string(ctx.Request.Header.Method()), filepath)
 
 	ctx.Response.Header.Add("WWW-Authenticate", "Basic realm=Restricted")
 
@@ -113,47 +114,26 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 
 		// TODO: Check active status of account
 
+		prefix = strings.Replace(string(ctx.Request.Header.Peek("x-webdav-prefix")), ":username", username, 1)
+		filepath = params.ByName("filepath")
+
 		// Configure directory for user
+		handler.Prefix = prefix
 		handler.FileSystem = webdav.Dir(config.Configuration.Accounts[username].RootDirectory)
-
-		// Get file/directory info
-		info, err := handler.FileSystem.Stat(context.TODO(), string(filepath))
-
-		fmt.Println("-=-=-=-=-=-=-=", filepath, info)
-
-		if info == nil {
-			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusNotFound), fasthttp.StatusNotFound)
-			return
-		} else if err != nil {
-			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusInternalServerError), fasthttp.StatusInternalServerError)
-			fmt.Println(err)
-			return
-		}
-
-		// Manage filename and directory situation
-		if info.IsDir() == true {
-			if string(ctx.Request.Header.Method()) == fasthttp.MethodGet {
-				ctx.Request.Header.SetMethod("PROPFIND")
-			}
-		} else {
-			filename = info.Name()
-		}
 
 		// Convert fasthttp request to net/http compatible for webdav server
 		if err := fasthttpadaptor.ConvertRequest(ctx, &webdavRequest, true); err != nil {
 			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusBadRequest), fasthttp.StatusBadRequest)
 		}
 
-		// Set the webdav request to the requested filepath (no prefix)
-		webdavRequest.URL.Path = filepath
-		webdavRequest.RequestURI = "http://" + webdavRequest.Host + filepath
-
 		// Correct the Destination header
 		if len(webdavRequest.Header.Get("Destination")) > 0 {
-			webdavRequest.Header.Set("Destination", strings.Replace(webdavRequest.Header.Get("Destination"), strings.Replace(prefix, ":username", username, 1), "", 1))
+			// Check if the suffix is the prefix
+			if strings.HasSuffix(webdavRequest.Header.Get("Destination"), prefix) == true || strings.HasSuffix(webdavRequest.Header.Get("Destination")+"/", prefix) == true {
+				// Deal with the filename move to the root, when Destination is not sent properly (Dolphin, others?)
+				webdavRequest.Header.Set("Destination", webdavRequest.Header.Get("Destination")+"/"+path.Base(filepath))
+			}
 		}
-
-		fmt.Println(webdavRequest)
 
 		// Run the webdav request
 		handler.ServeHTTP(&webdavResponse, &webdavRequest)
@@ -180,16 +160,22 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 				ctx.Response.Header.Set(k, v)
 			}
 
-			// If it's a file, add the following
-			if filename != "" {
-				ctx.Response.Header.Set(fasthttp.HeaderETag, webdavResponse.Header().Get(fasthttp.HeaderETag))
-				ctx.Response.Header.Set(fasthttp.HeaderLastModified, webdavResponse.Header().Get(fasthttp.HeaderLastModified))
-				ctx.Response.Header.Set(fasthttp.HeaderContentDisposition, `attachment; filename="`+filename+`"`)
-				ctx.Response.Header.Set("filename", `"`+filename+`"`)
+			// Get file/directory info
+			if info, err := handler.FileSystem.Stat(context.TODO(), string(filepath)); err == nil {
+
+				// If it's a file, add the following
+				if info.IsDir() == false {
+					filename = info.Name()
+
+					ctx.Response.Header.Set(fasthttp.HeaderETag, webdavResponse.Header().Get(fasthttp.HeaderETag))
+					ctx.Response.Header.Set(fasthttp.HeaderLastModified, webdavResponse.Header().Get(fasthttp.HeaderLastModified))
+					ctx.Response.Header.Set(fasthttp.HeaderContentDisposition, `attachment; filename="`+filename+`"`)
+					ctx.Response.Header.Set("filename", `"`+filename+`"`)
+				}
 			}
 		}
 	} else {
-		ctx.Response.Header.Add("www-authenticate", `Basic realm=Restricted"`)
+		ctx.Response.Header.Add("www-authenticate", `Basic realm=Restricted`)
 		fmt.Println(err)
 	}
 
