@@ -12,32 +12,32 @@ import (
 // Configuration : Application Configuration File Sructure
 // Revision 1
 type Configuration struct {
-	Revision int                             `json:"revision"`
-	Port     string                          `json:"port"`
-	Logging  map[string]LogConfiguration     `json:"logging"`
-	Accounts map[string]AccountConfiguration `json:"accounts"`
+	Revision int                             `yaml:"revision"`
+	Port     string                          `yaml:"port"`
+	Logging  map[string]LogConfiguration     `yaml:"logging"`
+	Accounts map[string]AccountConfiguration `yaml:"accounts"`
 }
 
 // LogConfiguration : Log Configuration
 type LogConfiguration struct {
-	Filename string `json:"filename"`
-	MaxBytes int64  `json:"max_bytes"`
-	MaxFiles int    `json:"max_files"`
+	Filename string `yaml:"filename"`
+	MaxBytes int64  `yaml:"max_bytes"`
+	MaxFiles int    `yaml:"max_files"`
 }
 
 // PasswordConfiguration : Account Password Configuration
 type PasswordConfiguration struct {
-	Password    string    `json:"password"`
-	Description string    `json:"description"`
-	LastUsed    time.Time `json:"last_used"`
+	Password    string    `yaml:"password"`
+	Description string    `yaml:"description"`
+	LastUsed    time.Time `yaml:"last_used"`
 }
 
 // AccountConfiguration : Account Profile Configuration
 type AccountConfiguration struct {
-	Username      string                           `json:"username"`
-	Email         string                           `json:"email"`
-	Passwords     map[string]PasswordConfiguration `json:"passwords"`
-	IsActive      bool                             `json:"active"`
-	IsAdmin       bool                             `json:"admin"`
-	RootDirectory string                           `json:"root_dir"`
+	Username      string                           `yaml:"username"`
+	Email         string                           `yaml:"email"`
+	Passwords     map[string]PasswordConfiguration `yaml:"passwords"`
+	IsActive      bool                             `yaml:"active"`
+	IsAdmin       bool                             `yaml:"admin"`
+	RootDirectory string                           `yaml:"root_dir"`
 }
