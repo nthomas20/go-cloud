@@ -230,6 +230,8 @@ func launchApp(c *cli.Context) error {
 
 	log.Println("Could not launch service")
 	return errors.New("Could not launch service")
+
+	// return nil
 }
 
 func main() {

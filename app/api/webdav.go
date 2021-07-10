@@ -22,9 +22,7 @@ import (
 )
 
 var (
-	basicAuthPrefix = []byte("Basic ")
-	handler         = &webdav.Handler{
-		// FileSystem: webdav.Dir(rootFolder),
+	handler = &webdav.Handler{
 		LockSystem: webdav.NewMemLS(),
 	}
 )
@@ -63,9 +61,12 @@ func (w *netHTTPResponseWriter) Body() []byte {
 }
 
 func basicAuth(ctx *fasthttp.RequestCtx) (string, string, error) {
+	var (
+		basicAuthPrefix = []byte("Basic ")
+	)
+
 	// Get the Basic Authentication credentials
 	auth := ctx.Request.Header.Peek("Authorization")
-	fmt.Println(string(auth))
 	if bytes.HasPrefix(auth, basicAuthPrefix) {
 		// Check credentials
 		payload, err := base64.StdEncoding.DecodeString(string(auth[len(basicAuthPrefix):]))
@@ -79,7 +80,7 @@ func basicAuth(ctx *fasthttp.RequestCtx) (string, string, error) {
 	}
 
 	// Request Basic Authentication otherwise
-	ctx.Response.Header.Add("WWW-Authenticate", `Basic realm="Restricted"`)
+	ctx.Response.Header.Add("WWW-Authenticate", "Basic realm=Restricted")
 	ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
 
 	return "", "", errors.New("invalid or missing authorization")
@@ -90,14 +91,14 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		webdavResponse netHTTPResponseWriter
 		webdavRequest  http.Request
 		filepath       = params.ByName("filepath")
+		filename       = ""
 	)
 
-	fmt.Println(string(ctx.Request.RequestURI()))
-	fmt.Println(filepath)
+	fmt.Println(string(ctx.Request.Header.Method()), filepath)
+
+	// Pull the
 
 	if username, password, err := basicAuth(ctx); err == nil {
-		fmt.Println(username, password)
-
 		// Check username and password against available configuration
 		if _, found := config.Configuration.Accounts[username]; found == false {
 			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
@@ -114,17 +115,22 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		// Configure directory for user
 		handler.FileSystem = webdav.Dir(config.Configuration.Accounts[username].RootDirectory)
 
-		// Manage directory properties
-		if string(ctx.Request.Header.Method()) == "GET" {
-			info, err := handler.FileSystem.Stat(context.TODO(), string(filepath))
+		// Get file/directory info
+		info, err := handler.FileSystem.Stat(context.TODO(), string(filepath))
 
-			if err == nil && info.IsDir() {
-				fmt.Println("DIRECTORY")
-				ctx.Request.Header.SetMethod("PROPFIND")
-			}
+		if err != nil {
+			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusInternalServerError), fasthttp.StatusInternalServerError)
+			fmt.Println(err)
 		}
 
-		fmt.Println(string(ctx.Request.Header.Method()))
+		// Manage filename and directory situation
+		if info.IsDir() == true {
+			if string(ctx.Request.Header.Method()) == fasthttp.MethodGet {
+				ctx.Request.Header.SetMethod("PROPFIND")
+			}
+		} else {
+			filename = info.Name()
+		}
 
 		// Convert fasthttp request to net/http compatible for webdav server
 		if err := fasthttpadaptor.ConvertRequest(ctx, &webdavRequest, true); err != nil {
@@ -133,13 +139,17 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 
 		// Set the webdav request to the requested filepath (no prefix)
 		webdavRequest.URL.Path = filepath
+		webdavRequest.RequestURI = "http://localhost" + filepath
+		webdavRequest.Host = "localhost"
+		webdavRequest.Header.Set("Host", "localhost")
+		// TODO: Correct the Destination header, if it exists
+		fmt.Println(webdavRequest.Header.Get("Destination"))
+
+		fmt.Println(webdavRequest.Method, webdavRequest.URL.Path)
+		// fmt.Println(webdavRequest.RequestURI, webdavRequest.URL.RequestURI())
 
 		// Run the webdav request
 		handler.ServeHTTP(&webdavResponse, &webdavRequest)
-
-		// fmt.Println("----------------")
-		// fmt.Println("content-type", webdavResponse.Header().Get("content-type"))
-		// fmt.Println("content-length", webdavResponse.Header().Get("content-length"))
 
 		// Transition webdav response back to fasthttp
 		if webdavResponse.StatusCode() > 299 {
@@ -148,10 +158,25 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 			// Set the webdav server information back to the actual http response
 			ctx.Response.SetStatusCode(webdavResponse.StatusCode())
 			ctx.Response.SetBody(webdavResponse.Body())
-			ctx.Response.Header.Set("content-type", webdavResponse.Header().Get("content-type"))
-			ctx.Response.Header.Set("content-length", webdavResponse.Header().Get("content-length"))
 
-			// TODO: Deal with meta data or modifications
+			for k, v := range map[string]string{
+				fasthttp.HeaderContentType:           webdavResponse.Header().Get(fasthttp.HeaderContentType),
+				fasthttp.HeaderContentLength:         webdavResponse.Header().Get(fasthttp.HeaderContentLength),
+				fasthttp.HeaderExpires:               "Thu, 19 Nov 1981 08:52:00 GMT",
+				fasthttp.HeaderCacheControl:          "no-store, no-cache, must-revalidate",
+				fasthttp.HeaderPragma:                "no-cache",
+				fasthttp.HeaderContentSecurityPolicy: "default-src 'none';",
+				fasthttp.HeaderLastModified:          webdavResponse.Header().Get(fasthttp.HeaderLastModified),
+				fasthttp.HeaderETag:                  webdavResponse.Header().Get(fasthttp.HeaderETag),
+			} {
+				ctx.Response.Header.Set(k, v)
+			}
+
+			// If it's a file, add the following
+			if filename != "" {
+				ctx.Response.Header.Set(fasthttp.HeaderContentDisposition, `attachment; filename="`+filename+`"`)
+				ctx.Response.Header.Set("filename", `"`+filename+`"`)
+			}
 		}
 	} else {
 		ctx.Response.Header.Add("www-authenticate", `Basic realm=Restricted"`)

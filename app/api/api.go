@@ -38,18 +38,20 @@ func (config *Configuration) setupRouter() *fasthttprouter.Router {
 	// r.GET("/status", status)
 	// r.GET("/version", config.version)
 
-	r.GET("/webdav", config.webdav)
-	r.POST("/webdav", config.webdav)
-	r.PUT("/webdav", config.webdav)
-	r.HEAD("/webdav", config.webdav)
-	r.OPTIONS("/webdav", config.webdav)
-
-	r.GET("/webdav/*filepath", config.webdav)
-	r.POST("/webdav/*filepath", config.webdav)
-	r.PUT("/webdav/*filepath", config.webdav)
-	r.HEAD("/webdav/*filepath", config.webdav)
-	r.OPTIONS("/webdav/*filepath", config.webdav)
-	r.DELETE("/webdav/*filepath", config.webdav)
+	// go-cloud and nextcloud compatible webdav
+	for _, route := range []string{"/webdav/*filepath", "/remote.php/dav/files/:username/*filepath"} {
+		r.GET(route, config.webdav)
+		r.POST(route, config.webdav)
+		r.PUT(route, config.webdav)
+		r.HEAD(route, config.webdav)
+		r.OPTIONS(route, config.webdav)
+		r.DELETE(route, config.webdav)
+		r.Handle("PROPFIND", route, config.webdav)
+		r.Handle("MKCOL", route, config.webdav)
+		r.Handle("MOVE", route, config.webdav)
+		r.Handle("LOCK", route, config.webdav)
+		r.Handle("UNLOCK", route, config.webdav)
+	}
 
 	return r
 }

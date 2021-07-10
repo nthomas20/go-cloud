@@ -68,6 +68,8 @@ func Run(config *models.Configuration) {
 	// }
 
 	server := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Method, r.URL.Path)
+		fmt.Println(r)
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 		username, password, authOK := r.BasicAuth()
 
@@ -75,8 +77,6 @@ func Run(config *models.Configuration) {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
-
-		fmt.Println(&config)
 
 		// Check username and password against available configuration
 		if _, found := config.Accounts[username]; found == false {
@@ -104,8 +104,6 @@ func Run(config *models.Configuration) {
 		}
 
 		handler.ServeHTTP(w, r)
-
-		fmt.Println("-------------- after serve")
 	})
 
 	go func() {
