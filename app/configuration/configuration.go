@@ -44,6 +44,7 @@ func ReadConfiguration(config *models.Configuration) error {
 	if err != nil {
 		// Create blank config
 		config.Revision = 1
+		config.Port = "8080"
 		config.Accounts = make(map[string]models.AccountConfiguration)
 
 		// Store our new configuration!

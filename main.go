@@ -17,9 +17,11 @@ import (
 	"syscall"
 	"time"
 
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/api"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/cmd"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
-	"gitea.nthomas20.net/nathaniel/go-cloud/app/webdav"
+	"gitea.nthomas20.net/nathaniel/go-cloud/app/jobs"
 	"github.com/urfave/cli/v2"
 )
 
@@ -58,7 +60,7 @@ func alreadyRunning() (bool, int64) {
 }
 
 func registerCLI() ([]*cli.Command, []cli.Flag) {
-	return []*cli.Command{
+	return append(cmd.Commands(), []*cli.Command{
 			{
 				Name:    "version",
 				Aliases: []string{"v"},
@@ -130,12 +132,6 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 						err error
 					)
 
-					// Load configuration
-					// if err = loadEnvVars(c); err != nil {
-					// 	return err
-					// }
-
-					// Impossible to run as daemon if app is not logged properly
 					// Check relationship status
 					if os.Args[len(os.Args)-1] == "CHILD_PROCESS" {
 						bootstrap.ConfigDirectory = os.Args[len(os.Args)-2]
@@ -173,7 +169,7 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 
 				},
 			},
-		},
+		}...),
 
 		[]cli.Flag{}
 }
@@ -206,12 +202,33 @@ func launchTerminationListener() {
 }
 
 func launchApp(c *cli.Context) error {
-	webdav.Run()
+	// Setup the app
+	var app api.API
 
-	// Run forever
-	_ = <-runnerChan
+	app = &api.Configuration{
+		Configuration: config,
+		Version:       version,
+		BuildDate:     buildDate,
+	}
 
-	return nil
+	// Automatically reload configuration
+	jobs.RefreshConfiguration(config, time.Duration(time.Second*60))
+
+	// We follow this pattern to plan ahead to allow for control and internal status check listeners
+	if success := app.Run(); success == true {
+		// Give us a moment to bind to the port, or exit
+		time.Sleep(2 * time.Second)
+
+		log.Println("Service Started. Listening on port " + config.Port)
+
+		// Run forever
+		_ = <-runnerChan
+
+		return nil
+	}
+
+	log.Println("Could not launch service")
+	return errors.New("Could not launch service")
 }
 
 func main() {
