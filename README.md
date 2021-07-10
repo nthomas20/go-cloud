@@ -46,6 +46,8 @@ Account configurations may be made via CLI commands in real-time and will be ref
 
 Replace `${...}` with their appropriate values
 
+The configuration file is stored in `config.yaml`. If this file exists in the current directory it will be utilized, otherwise the file will be located at `~/.go-cloud/config.yaml`
+
 ### Adding an account
 
 ```bash
