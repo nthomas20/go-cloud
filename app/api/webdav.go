@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
@@ -92,6 +93,7 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		webdavRequest  http.Request
 		filepath       = params.ByName("filepath")
 		filename       = ""
+		prefix         = string(ctx.Request.Header.Peek("x-webdav-prefix"))
 	)
 
 	fmt.Println(string(ctx.Request.Header.Method()), filepath)
@@ -139,14 +141,14 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 
 		// Set the webdav request to the requested filepath (no prefix)
 		webdavRequest.URL.Path = filepath
-		webdavRequest.RequestURI = "http://localhost" + filepath
-		webdavRequest.Host = "localhost"
-		webdavRequest.Header.Set("Host", "localhost")
-		// TODO: Correct the Destination header, if it exists
-		fmt.Println(webdavRequest.Header.Get("Destination"))
+		webdavRequest.RequestURI = "http://" + webdavRequest.Host + filepath
 
-		fmt.Println(webdavRequest.Method, webdavRequest.URL.Path)
-		// fmt.Println(webdavRequest.RequestURI, webdavRequest.URL.RequestURI())
+		// Correct the Destination header
+		if len(webdavRequest.Header.Get("Destination")) > 0 {
+			webdavRequest.Header.Set("Destination", strings.Replace(webdavRequest.Header.Get("Destination"), strings.Replace(prefix, ":username", username, 1), "", 1))
+		}
+
+		fmt.Println(webdavRequest)
 
 		// Run the webdav request
 		handler.ServeHTTP(&webdavResponse, &webdavRequest)

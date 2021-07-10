@@ -28,6 +28,16 @@ type Configuration struct {
 	BuildDate     string
 }
 
+func trackPrefix(prefix string, next fasthttprouter.Handle) fasthttprouter.Handle {
+	return fasthttprouter.Handle(func(ctx *fasthttp.RequestCtx, params fasthttprouter.Params) {
+		// Set prefix header
+		ctx.Request.Header.Add("x-webdav-prefix", prefix)
+
+		// Call the next step
+		next(ctx, params)
+	})
+}
+
 func (config *Configuration) setupRouter() *fasthttprouter.Router {
 	// Configure our Router
 	r := fasthttprouter.New()
@@ -39,18 +49,20 @@ func (config *Configuration) setupRouter() *fasthttprouter.Router {
 	// r.GET("/version", config.version)
 
 	// go-cloud and nextcloud compatible webdav
-	for _, route := range []string{"/webdav/*filepath", "/remote.php/dav/files/:username/*filepath"} {
-		r.GET(route, config.webdav)
-		r.POST(route, config.webdav)
-		r.PUT(route, config.webdav)
-		r.HEAD(route, config.webdav)
-		r.OPTIONS(route, config.webdav)
-		r.DELETE(route, config.webdav)
-		r.Handle("PROPFIND", route, config.webdav)
-		r.Handle("MKCOL", route, config.webdav)
-		r.Handle("MOVE", route, config.webdav)
-		r.Handle("LOCK", route, config.webdav)
-		r.Handle("UNLOCK", route, config.webdav)
+	for _, prefix := range []string{"/webdav", "/remote.php/dav/files/:username"} {
+		route := prefix + "/*filepath"
+
+		r.GET(route, trackPrefix(prefix, config.webdav))
+		r.POST(route, trackPrefix(prefix, config.webdav))
+		r.PUT(route, trackPrefix(prefix, config.webdav))
+		r.HEAD(route, trackPrefix(prefix, config.webdav))
+		r.OPTIONS(route, trackPrefix(prefix, config.webdav))
+		r.DELETE(route, trackPrefix(prefix, config.webdav))
+		r.Handle("PROPFIND", route, trackPrefix(prefix, config.webdav))
+		r.Handle("MKCOL", route, trackPrefix(prefix, config.webdav))
+		r.Handle("MOVE", route, trackPrefix(prefix, config.webdav))
+		r.Handle("LOCK", route, trackPrefix(prefix, config.webdav))
+		r.Handle("UNLOCK", route, trackPrefix(prefix, config.webdav))
 	}
 
 	return r
