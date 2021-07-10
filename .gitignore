@@ -23,7 +23,7 @@ coverage.txt
 .vscode/
 __debug*
 
-# Ignore local bin directory and pif files
+# Ignore local bin directory and pid files
 /bin
 *.pid
 
