@@ -5,6 +5,8 @@ go-cloud aims to provide cloud functionality using established open protocols. I
 
 Currently webdav functionality is provided via google's [webdav module](https://pkg.go.dev/golang.org/x/net/webdav), in the future a native module may be created #dreams
 
+go-cloud does not strive to provide TLs support. There are already 1,000,000,000 (slightly exaggerated) other ways of providing this. go-cloud should be run behind a reverse proxy (such as haproxy) where TLS will terminate and forward requests on to go-cloud. You should use [certbot](https://certbot.eff.org/)
+
 # Installation
 
 ## Requirements
