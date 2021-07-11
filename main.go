@@ -69,6 +69,23 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 					fmt.Println("Version:   ", version)
 					fmt.Println("Build Date:", buildDate)
 
+					if state, pid := alreadyRunning(); state == true {
+						// Bootstrap Configuration
+						bootstrap.SetupConfiguration()
+						configuration.ReadConfiguration(config)
+						fmt.Println("\nVersion information of currently running PID " + strconv.Itoa(int(pid)))
+
+						// Load the http status report
+						if response, err := http.Get("http://localhost:" + config.Port + "/version"); err == nil {
+							defer response.Body.Close()
+							html, _ := ioutil.ReadAll(response.Body)
+							fmt.Println(string(html))
+							return nil
+						}
+
+						return errors.New("Could not retrieve server status page. Check configuration")
+					}
+
 					return nil
 				},
 			},
@@ -77,8 +94,6 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 				Aliases: []string{"t"},
 				Usage:   "Retrieve status of the service daemon",
 				Action: func(c *cli.Context) error {
-					// Load configuration
-					// loadEnvVars(c)
 					// Bootstrap Configuration
 					bootstrap.SetupConfiguration()
 					configuration.ReadConfiguration(config)

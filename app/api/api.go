@@ -1,5 +1,6 @@
 /*
- *
+ * Filename: api.go
+ * Author: Nathaniel Thomas
  */
 
 package api
@@ -64,10 +65,10 @@ func (config *Configuration) setupRouter() *fasthttprouter.Router {
 	r.RedirectTrailingSlash = false
 
 	// Configure our GET method routes
-	// r.GET("/", index)
-	// r.GET("/ping", ping)
-	// r.GET("/status", status)
-	// r.GET("/version", config.version)
+	r.GET("/", index)
+	r.GET("/ping", ping)
+	r.GET("/status", status)
+	r.GET("/version", config.version)
 
 	// go-cloud and nextcloud compatible webdav
 	// https://cs.opensource.google/go/x/net/+/04defd46:webdav/webdav.go;l=42
