@@ -94,11 +94,11 @@ func registerCLI() ([]*cli.Command, []cli.Flag) {
 				Aliases: []string{"t"},
 				Usage:   "Retrieve status of the service daemon",
 				Action: func(c *cli.Context) error {
-					// Bootstrap Configuration
-					bootstrap.SetupConfiguration()
-					configuration.ReadConfiguration(config)
-
 					if state, pid := alreadyRunning(); state == true {
+						// Bootstrap Configuration
+						bootstrap.SetupConfiguration()
+						configuration.ReadConfiguration(config)
+
 						fmt.Println("The service is currently running with PID " + strconv.Itoa(int(pid)))
 
 						// Load the http status report
