@@ -113,6 +113,10 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		}
 
 		// TODO: Check active status of account
+		if config.Configuration.Accounts[username].IsActive == false {
+			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
+			return
+		}
 
 		prefix = strings.Replace(string(ctx.Request.Header.Peek("x-webdav-prefix")), ":username", username, 1)
 		filepath = params.ByName("filepath")

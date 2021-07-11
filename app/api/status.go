@@ -11,7 +11,7 @@ import (
 )
 
 func index(ctx *fasthttp.RequestCtx, _ fasthttprouter.Params) {
-	ctx.WriteString("BritePool API")
+	ctx.WriteString("GO Cloud")
 	return
 }
 
