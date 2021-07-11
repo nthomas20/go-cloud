@@ -8,6 +8,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
@@ -33,6 +34,12 @@ func addAccount(c *cli.Context) error {
 	// Check for existing account
 	if _, found := config.Accounts[username]; found == true {
 		return errors.New("Account " + username + " already exists")
+	}
+
+	// Check directory existence
+	_, err := os.Stat(directory)
+	if os.IsNotExist(err) {
+		return errors.New("Directory does not exist")
 	}
 
 	// Add new account
@@ -114,6 +121,12 @@ func updateAccount(c *cli.Context) error {
 	}
 
 	if directory != "" {
+		// Check directory existence
+		_, err := os.Stat(directory)
+		if os.IsNotExist(err) {
+			return errors.New("Directory does not exist")
+		}
+
 		account.RootDirectory = directory
 	}
 
