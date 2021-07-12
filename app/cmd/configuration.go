@@ -12,9 +12,24 @@ import (
 // Commands : Return the full set of registered commands
 func Commands() []*cli.Command {
 	flags := map[string]cli.Flag{
+		"active": &cli.BoolFlag{
+			Name:  "active",
+			Usage: "Specify active state",
+			Value: false,
+		},
+		"inactive": &cli.BoolFlag{
+			Name:  "inactive",
+			Usage: "Specify active state",
+			Value: false,
+		},
 		"admin": &cli.BoolFlag{
 			Name:  "admin",
-			Usage: "Specify administrator privileges [optional]",
+			Usage: "Specify administrator privileges",
+			Value: false,
+		},
+		"noadmin": &cli.BoolFlag{
+			Name:  "noadmin",
+			Usage: "Specify no administrator privileges",
 			Value: false,
 		},
 		"description": &cli.StringFlag{
@@ -29,11 +44,21 @@ func Commands() []*cli.Command {
 			Usage:    "Specify directory path (e.g. /var/data/webdav)",
 			Required: true,
 		},
+		"directory-optional": &cli.StringFlag{
+			Name:    "directory",
+			Aliases: []string{"dir"},
+			Usage:   "Specify directory path (e.g. /var/data/webdav)",
+		},
 		"email": &cli.StringFlag{
 			Name:     "email",
 			Aliases:  []string{"e"},
 			Usage:    "Specify email",
 			Required: true,
+		},
+		"email-optional": &cli.StringFlag{
+			Name:    "email",
+			Aliases: []string{"e"},
+			Usage:   "Specify email",
 		},
 		"password": &cli.StringFlag{
 			Name:     "password",
@@ -75,6 +100,21 @@ func Commands() []*cli.Command {
 					Action:  deleteAccount,
 					Flags: []cli.Flag{
 						flags["username"],
+					},
+				},
+				{
+					Name:    "update",
+					Usage:   "Update account",
+					Aliases: []string{"u"},
+					Action:  updateAccount,
+					Flags: []cli.Flag{
+						flags["username"],
+						flags["email-optional"],
+						flags["directory-optional"],
+						flags["admin"],
+						flags["noadmin"],
+						flags["active"],
+						flags["inactive"],
 					},
 				},
 			},
