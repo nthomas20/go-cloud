@@ -20,6 +20,7 @@ import (
 func NewConfiguration() *models.Configuration {
 	config := models.Configuration{
 		Revision: 1,
+		Port:     "8080",
 		Logging: map[string]models.LogConfiguration{
 			"app": {
 				Filename: "go-cloud.log",
@@ -27,6 +28,7 @@ func NewConfiguration() *models.Configuration {
 				MaxFiles: 3,
 			},
 		},
+		Accounts: make(map[string]models.AccountConfiguration),
 	}
 
 	return &config
@@ -42,12 +44,7 @@ func ReadConfiguration(config *models.Configuration) error {
 	fileBytes, err := ioutil.ReadFile(configFile)
 
 	if err != nil {
-		// Create blank config
-		config.Revision = 1
-		config.Port = "8080"
-		config.Accounts = make(map[string]models.AccountConfiguration)
-
-		// Store our new configuration!
+		// Store the new configuration!
 		WriteConfiguration(config)
 	} else {
 		// Process our contents

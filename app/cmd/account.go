@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
@@ -19,7 +20,7 @@ import (
 func addAccount(c *cli.Context) error {
 	var (
 		config    = configuration.NewConfiguration()
-		username  = c.String("username")
+		username  = strings.ToLower(c.String("username"))
 		email     = c.String("email")
 		directory = c.String("directory")
 		admin     = c.Bool("admin")
@@ -64,7 +65,7 @@ func addAccount(c *cli.Context) error {
 func deleteAccount(c *cli.Context) error {
 	var (
 		config   = configuration.NewConfiguration()
-		username = c.String("username")
+		username = strings.ToLower(c.String("username"))
 	)
 
 	// Read Configuration
@@ -93,7 +94,7 @@ func deleteAccount(c *cli.Context) error {
 func updateAccount(c *cli.Context) error {
 	var (
 		config    = configuration.NewConfiguration()
-		username  = c.String("username")
+		username  = strings.ToLower(c.String("username"))
 		email     = c.String("email")
 		directory = c.String("directory")
 		admin     = c.Bool("admin")

@@ -47,7 +47,7 @@ func Commands() []*cli.Command {
 		"directory-optional": &cli.StringFlag{
 			Name:    "directory",
 			Aliases: []string{"dir"},
-			Usage:   "Specify directory path (e.g. /var/data/webdav)",
+			Usage:   "Specify directory path (e.g. /var/data/webdav) [optional]",
 		},
 		"email": &cli.StringFlag{
 			Name:     "email",
@@ -58,7 +58,13 @@ func Commands() []*cli.Command {
 		"email-optional": &cli.StringFlag{
 			Name:    "email",
 			Aliases: []string{"e"},
-			Usage:   "Specify email",
+			Usage:   "Specify email [optional]",
+		},
+		"key": &cli.StringFlag{
+			Name:     "key",
+			Aliases:  []string{"k"},
+			Usage:    "Specify key",
+			Required: true,
 		},
 		"password": &cli.StringFlag{
 			Name:     "password",
@@ -66,10 +72,26 @@ func Commands() []*cli.Command {
 			Usage:    "Specify password",
 			Required: true,
 		},
+		"password-optional": &cli.StringFlag{
+			Name:    "password",
+			Aliases: []string{"p"},
+			Usage:   "Specify password [optional]",
+		},
 		"username": &cli.StringFlag{
 			Name:     "username",
 			Aliases:  []string{"u"},
 			Usage:    "Specify username",
+			Required: true,
+		},
+		"username-optional": &cli.StringFlag{
+			Name:    "username",
+			Aliases: []string{"u"},
+			Usage:   "Specify username [optional]",
+		},
+		"value": &cli.StringFlag{
+			Name:     "value",
+			Aliases:  []string{"v"},
+			Usage:    "Specify value",
 			Required: true,
 		},
 	}
@@ -147,5 +169,60 @@ func Commands() []*cli.Command {
 					},
 				},
 			},
-		}}
+		},
+		// Configuration Management
+		{
+			Name:    "config",
+			Usage:   "Configuration management command",
+			Aliases: []string{"c"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "get",
+					Usage:   "Get configuration value",
+					Aliases: []string{"g"},
+					Action:  getConfig,
+					Flags: []cli.Flag{
+						flags["key"],
+					},
+				},
+				{
+					Name:    "set",
+					Usage:   "Set configuration value",
+					Aliases: []string{"s"},
+					Action:  setConfig,
+					Flags: []cli.Flag{
+						flags["key"],
+						flags["value"],
+					},
+				},
+			},
+		},
+		// Lists!
+		{
+			Name:    "list",
+			Usage:   "List out information",
+			Aliases: []string{"l"},
+			Subcommands: []*cli.Command{
+				{
+					Name:    "account",
+					Usage:   "List accounts",
+					Aliases: []string{"a"},
+					Action:  listUsername,
+					Flags: []cli.Flag{
+						flags["username-optional"],
+					},
+				},
+				{
+					Name:    "password",
+					Usage:   "List passwords",
+					Aliases: []string{"p"},
+					Action:  listPassword,
+					Flags: []cli.Flag{
+						flags["username"],
+						flags["password-optional"],
+					},
+				},
+			},
+		},
+	}
 }
