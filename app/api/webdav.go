@@ -173,7 +173,7 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 
 					ctx.Response.Header.Set(fasthttp.HeaderETag, webdavResponse.Header().Get(fasthttp.HeaderETag))
 					ctx.Response.Header.Set(fasthttp.HeaderLastModified, webdavResponse.Header().Get(fasthttp.HeaderLastModified))
-					ctx.Response.Header.Set(fasthttp.HeaderContentDisposition, `attachment; filename="`+filename+`"`)
+					ctx.Response.Header.Set(fasthttp.HeaderContentDisposition, `attachment; filename*=UTF-8''`+filename+`; filename="`+filename+`"`)
 					ctx.Response.Header.Set("filename", `"`+filename+`"`)
 				}
 			}
