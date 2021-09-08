@@ -34,10 +34,10 @@ type PasswordConfiguration struct {
 
 // AccountConfiguration : Account Profile Configuration
 type AccountConfiguration struct {
-	Username      string                           `yaml:"username"`
-	Email         string                           `yaml:"email"`
-	Passwords     map[string]PasswordConfiguration `yaml:"passwords"`
-	IsActive      bool                             `yaml:"active"`
-	IsAdmin       bool                             `yaml:"admin"`
-	RootDirectory string                           `yaml:"root_dir"`
+	Username      string                  `yaml:"username"`
+	Email         string                  `yaml:"email"`
+	Passwords     []PasswordConfiguration `yaml:"passwords"`
+	IsActive      bool                    `yaml:"active"`
+	IsAdmin       bool                    `yaml:"admin"`
+	RootDirectory string                  `yaml:"root_dir"`
 }

@@ -102,18 +102,25 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 
 	if username, password, err := basicAuth(ctx); err == nil {
 		// Check username and password against available configuration
-		if _, found := config.Configuration.Accounts[username]; found == false {
+		if _, found := config.Configuration.Accounts[username]; !found {
 			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
 			return
 		}
 
-		if _, found := config.Configuration.Accounts[username].Passwords[password]; found == false {
+		found := false
+		for _, p := range config.Configuration.Accounts[username].Passwords {
+			if p.Password == password {
+				found = true
+				break
+			}
+		}
+		if !found {
 			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
 			return
 		}
 
 		// TODO: Check active status of account
-		if config.Configuration.Accounts[username].IsActive == false {
+		if !config.Configuration.Accounts[username].IsActive {
 			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusUnauthorized), fasthttp.StatusUnauthorized)
 			return
 		}

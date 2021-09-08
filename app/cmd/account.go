@@ -33,20 +33,21 @@ func addAccount(c *cli.Context) error {
 	}
 
 	// Check for existing account
-	if _, found := config.Accounts[username]; found == true {
+	if _, found := config.Accounts[username]; found {
 		return errors.New("Account " + username + " already exists")
 	}
 
 	// Check directory existence
 	_, err := os.Stat(directory)
 	if os.IsNotExist(err) {
-		return errors.New("Directory does not exist")
+		return errors.New("directory does not exist")
 	}
 
 	// Add new account
 	config.Accounts[username] = models.AccountConfiguration{
 		Username:      username,
 		Email:         email,
+		Passwords:     make([]models.PasswordConfiguration, 0),
 		IsActive:      true,
 		IsAdmin:       admin,
 		RootDirectory: directory,
@@ -75,7 +76,7 @@ func deleteAccount(c *cli.Context) error {
 	}
 
 	// Check for existing account
-	if _, found := config.Accounts[username]; found == false {
+	if _, found := config.Accounts[username]; !found {
 		return errors.New("Account " + username + " does not exist")
 	}
 
@@ -110,7 +111,7 @@ func updateAccount(c *cli.Context) error {
 	}
 
 	// Check for existing account
-	if _, found := config.Accounts[username]; found == false {
+	if _, found := config.Accounts[username]; !found {
 		return errors.New("Account " + username + " does not exist")
 	}
 
@@ -125,21 +126,21 @@ func updateAccount(c *cli.Context) error {
 		// Check directory existence
 		_, err := os.Stat(directory)
 		if os.IsNotExist(err) {
-			return errors.New("Directory does not exist")
+			return errors.New("directory does not exist")
 		}
 
 		account.RootDirectory = directory
 	}
 
-	if noadmin == true {
+	if noadmin {
 		account.IsAdmin = false
-	} else if admin == true {
+	} else if admin {
 		account.IsAdmin = true
 	}
 
-	if inactive == true {
+	if inactive {
 		account.IsActive = false
-	} else if active == true {
+	} else if active {
 		account.IsActive = true
 	}
 

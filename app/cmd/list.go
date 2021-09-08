@@ -19,7 +19,7 @@ func listPassword(c *cli.Context) error {
 	var (
 		config   = configuration.NewConfiguration()
 		username = strings.ToLower(c.String("username"))
-		password = c.String("password")
+		password = c.Int("password")
 	)
 
 	// Read Configuration
@@ -28,20 +28,20 @@ func listPassword(c *cli.Context) error {
 		return err
 	}
 
-	if password == "" {
+	if password == 0 {
 		// List all passwords
-		for p := range config.Accounts[username].Passwords {
-			fmt.Println(p)
+		for i, p := range config.Accounts[username].Passwords {
+			fmt.Println(i, p.Password)
 		}
 	} else {
 		// Check for existing account
-		if _, found := config.Accounts[username]; found == false {
+		if _, found := config.Accounts[username]; !found {
 			return errors.New("Account " + username + " does not exist")
 		}
 
-		// Check for existing password information
-		if _, found := config.Accounts[username].Passwords[password]; found == false {
-			return errors.New("Account password does not exist")
+		// Check for password index out-of-bounds
+		if password < 0 || password > len(config.Accounts[username].Passwords) {
+			return errors.New("invalid password index")
 		}
 
 		// Grab the account passwords
@@ -73,7 +73,7 @@ func listUsername(c *cli.Context) error {
 		}
 	} else {
 		// Check for existing account
-		if _, found := config.Accounts[username]; found == false {
+		if _, found := config.Accounts[username]; !found {
 			return errors.New("Account " + username + " does not exist")
 		}
 

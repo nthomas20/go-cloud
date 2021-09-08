@@ -32,7 +32,7 @@ func getConfig(c *cli.Context) error {
 		"logging.app.filename": config.Logging["app"].Filename,
 	}
 
-	if _, found := getables[key]; found == true {
+	if _, found := getables[key]; found {
 		fmt.Println(key+":", getables[key])
 	} else {
 		return errors.New("invalid or unavailable configuration key: " + key)

@@ -30,20 +30,29 @@ func addPassword(c *cli.Context) error {
 	}
 
 	// Check for existing account
-	if _, found := config.Accounts[username]; found == false {
+	if _, found := config.Accounts[username]; !found {
 		return errors.New("Account " + username + " does not exist")
 	}
 
 	// Check for existing password
-	if _, found := config.Accounts[username].Passwords[password]; found == true {
-		return errors.New("Account password already exists")
+	found := false
+	for _, p := range config.Accounts[username].Passwords {
+		if p.Password == password {
+			found = true
+			break
+		}
+	}
+	if found {
+		return errors.New("account password already exists")
 	}
 
 	// Add new password
-	config.Accounts[username].Passwords[password] = models.PasswordConfiguration{
+	account := config.Accounts[username]
+	account.Passwords = append(account.Passwords, models.PasswordConfiguration{
 		Password:    password,
 		Description: description,
-	}
+	})
+	config.Accounts[username] = account
 
 	// Write Configuration
 	if err := configuration.WriteConfiguration(config); err != nil {
@@ -59,7 +68,7 @@ func deletePassword(c *cli.Context) error {
 	var (
 		config   = configuration.NewConfiguration()
 		username = c.String("username")
-		password = c.String("password")
+		password = c.Int("password")
 	)
 
 	// Read Configuration
@@ -69,16 +78,17 @@ func deletePassword(c *cli.Context) error {
 	}
 
 	// Check for existing account
-	if _, found := config.Accounts[username]; found == false {
+	if _, found := config.Accounts[username]; !found {
 		return errors.New("Account " + username + " does not exist")
 	}
 
-	// Check for existing password
-	if _, found := config.Accounts[username].Passwords[password]; found == false {
-		return errors.New("Account password does not exist")
+	// Check for password index out-of-bounds
+	if password < 0 || password > len(config.Accounts[username].Passwords) {
+		return errors.New("invalid password index")
 	}
 
-	delete(config.Accounts[username].Passwords, password)
+	// TODO: Delete indexed item
+	// delete(config.Accounts[username].Passwords, password)
 
 	// Write Configuration
 	if err := configuration.WriteConfiguration(config); err != nil {
