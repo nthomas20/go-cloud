@@ -87,8 +87,10 @@ func deletePassword(c *cli.Context) error {
 		return errors.New("invalid password index")
 	}
 
-	// TODO: Delete indexed item
-	// delete(config.Accounts[username].Passwords, password)
+	// Delete indexed item
+	account := config.Accounts[username]
+	account.Passwords = append(account.Passwords[:password], account.Passwords[password+1:]...)
+	config.Accounts[username] = account
 
 	// Write Configuration
 	if err := configuration.WriteConfiguration(config); err != nil {
@@ -98,7 +100,7 @@ func deletePassword(c *cli.Context) error {
 	fmt.Println("Account password deleted")
 
 	if len(config.Accounts[username].Passwords) == 0 {
-		fmt.Println("No passwords set for account " + username)
+		fmt.Println("no passwords set for account " + username)
 	}
 
 	return nil
