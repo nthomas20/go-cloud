@@ -98,21 +98,23 @@ func deletePassword(c *cli.Context) error {
 	}
 
 	// Check for password index out-of-bounds
-	if password < 0 || password > len(config.Accounts[username].Passwords) {
-		return errors.New("invalid password index")
+	if len(config.Accounts[username].Passwords) > 0 {
+		if password < 0 || password > len(config.Accounts[username].Passwords) {
+			return errors.New("invalid password index")
+		}
+
+		// Delete indexed item
+		account := config.Accounts[username]
+		account.Passwords = append(account.Passwords[:password], account.Passwords[password+1:]...)
+		config.Accounts[username] = account
+
+		// Write Configuration
+		if err := configuration.WriteConfiguration(config); err != nil {
+			return err
+		}
+
+		fmt.Println("Account password deleted")
 	}
-
-	// Delete indexed item
-	account := config.Accounts[username]
-	account.Passwords = append(account.Passwords[:password], account.Passwords[password+1:]...)
-	config.Accounts[username] = account
-
-	// Write Configuration
-	if err := configuration.WriteConfiguration(config); err != nil {
-		return err
-	}
-
-	fmt.Println("Account password deleted")
 
 	if len(config.Accounts[username].Passwords) == 0 {
 		fmt.Println("no passwords set for account " + username)
