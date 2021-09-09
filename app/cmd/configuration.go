@@ -154,7 +154,7 @@ func Commands() []*cli.Command {
 					Action:  addPassword,
 					Flags: []cli.Flag{
 						flags["username"],
-						flags["password"],
+						flags["password-optional"],
 						flags["description"],
 					},
 				},

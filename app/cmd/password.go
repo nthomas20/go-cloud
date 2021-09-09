@@ -6,8 +6,11 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/bootstrap"
 	"gitea.nthomas20.net/nathaniel/go-cloud/app/configuration"
@@ -32,6 +35,18 @@ func addPassword(c *cli.Context) error {
 	// Check for existing account
 	if _, found := config.Accounts[username]; !found {
 		return errors.New("Account " + username + " does not exist")
+	}
+
+	// If not password is provided, ask for it
+	if password == "" {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Password: ")
+		password, _ = reader.ReadString('\n')
+		password = strings.Trim(password, " \n")
+	}
+
+	if password == "" {
+		return errors.New("invalid password")
 	}
 
 	// Check for existing password
