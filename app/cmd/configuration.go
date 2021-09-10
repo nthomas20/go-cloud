@@ -77,6 +77,21 @@ func Commands() []*cli.Command {
 			Aliases: []string{"p"},
 			Usage:   "Specify password [optional]",
 		},
+		"password-index": &cli.IntFlag{
+			Name:        "index",
+			Aliases:     []string{"i"},
+			Usage:       "Specify password index",
+			DefaultText: "None",
+			Value:       -1,
+			Required:    true,
+		},
+		"password-index-optional": &cli.IntFlag{
+			Name:        "index",
+			Aliases:     []string{"i"},
+			Usage:       "Specify password index",
+			DefaultText: "None",
+			Value:       -1,
+		},
 		"username": &cli.StringFlag{
 			Name:     "username",
 			Aliases:  []string{"u"},
@@ -165,7 +180,7 @@ func Commands() []*cli.Command {
 					Action:  deletePassword,
 					Flags: []cli.Flag{
 						flags["username"],
-						flags["password"],
+						flags["password-index"],
 					},
 				},
 			},
@@ -219,7 +234,7 @@ func Commands() []*cli.Command {
 					Action:  listPassword,
 					Flags: []cli.Flag{
 						flags["username"],
-						flags["password-optional"],
+						flags["password-index-optional"],
 					},
 				},
 			},

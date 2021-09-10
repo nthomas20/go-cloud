@@ -74,16 +74,16 @@ func addPassword(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Println("Account password added")
+	fmt.Println("account password added")
 
 	return nil
 }
 
 func deletePassword(c *cli.Context) error {
 	var (
-		config   = configuration.NewConfiguration()
-		username = c.String("username")
-		password = c.Int("password")
+		config        = configuration.NewConfiguration()
+		username      = c.String("username")
+		passwordIndex = c.Int("index")
 	)
 
 	// Read Configuration
@@ -99,13 +99,13 @@ func deletePassword(c *cli.Context) error {
 
 	// Check for password index out-of-bounds
 	if len(config.Accounts[username].Passwords) > 0 {
-		if password < 0 || password > len(config.Accounts[username].Passwords) {
+		if passwordIndex < 0 || passwordIndex > len(config.Accounts[username].Passwords) {
 			return errors.New("invalid password index")
 		}
 
 		// Delete indexed item
 		account := config.Accounts[username]
-		account.Passwords = append(account.Passwords[:password], account.Passwords[password+1:]...)
+		account.Passwords = append(account.Passwords[:passwordIndex], account.Passwords[passwordIndex+1:]...)
 		config.Accounts[username] = account
 
 		// Write Configuration
@@ -113,7 +113,7 @@ func deletePassword(c *cli.Context) error {
 			return err
 		}
 
-		fmt.Println("Account password deleted")
+		fmt.Println("account password deleted")
 	}
 
 	if len(config.Accounts[username].Passwords) == 0 {

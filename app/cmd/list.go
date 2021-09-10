@@ -17,9 +17,9 @@ import (
 
 func listPassword(c *cli.Context) error {
 	var (
-		config   = configuration.NewConfiguration()
-		username = strings.ToLower(c.String("username"))
-		password = c.Int("password")
+		config        = configuration.NewConfiguration()
+		username      = strings.ToLower(c.String("username"))
+		passwordIndex = c.Int("index")
 	)
 
 	// Read Configuration
@@ -28,10 +28,15 @@ func listPassword(c *cli.Context) error {
 		return err
 	}
 
-	if password == 0 {
-		// List all passwords
-		for i, p := range config.Accounts[username].Passwords {
-			fmt.Println(i, p.Password)
+	if passwordIndex == -1 {
+		if len(config.Accounts[username].Passwords) == 0 {
+			fmt.Println("no passwords set for account " + username)
+		} else {
+
+			// List all passwords
+			for i, p := range config.Accounts[username].Passwords {
+				fmt.Println(i, p.Password)
+			}
 		}
 	} else {
 		// Check for existing account
@@ -40,12 +45,12 @@ func listPassword(c *cli.Context) error {
 		}
 
 		// Check for password index out-of-bounds
-		if password < 0 || password > len(config.Accounts[username].Passwords) {
+		if passwordIndex < 0 || passwordIndex > len(config.Accounts[username].Passwords) {
 			return errors.New("invalid password index")
 		}
 
 		// Grab the account passwords
-		account := config.Accounts[username].Passwords[password]
+		account := config.Accounts[username].Passwords[passwordIndex]
 
 		fmt.Println("Password:   ", account.Password)
 		fmt.Println("Description:", account.Description)

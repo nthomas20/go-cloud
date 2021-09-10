@@ -58,7 +58,7 @@ func addAccount(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Println("Account " + username + " added")
+	fmt.Println("account " + username + " added")
 
 	return nil
 }
@@ -87,7 +87,7 @@ func deleteAccount(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Println("Account " + username + " deleted")
+	fmt.Println("account " + username + " deleted")
 
 	return nil
 }
@@ -152,7 +152,7 @@ func updateAccount(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Println("Account " + username + " updated")
+	fmt.Println("account " + username + " updated")
 
 	return nil
 }
