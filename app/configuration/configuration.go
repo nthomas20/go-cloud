@@ -55,8 +55,8 @@ func ReadConfiguration(config *models.Configuration) error {
 		}
 	}
 
-	if validConfiguration == false {
-		return errors.New("Invalid Configuration")
+	if !validConfiguration {
+		return errors.New("invalid Configuration")
 	}
 
 	return nil

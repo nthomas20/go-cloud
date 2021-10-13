@@ -30,7 +30,7 @@ func Write(logger *log.Logger, o interface{}, debugOptional ...bool) {
 	if logRow, err := json.Marshal(o); err == nil {
 		logger.Println(string(logRow[:]))
 
-		if debug == true {
+		if debug {
 			fmt.Println(string(logRow[:]))
 		}
 	}

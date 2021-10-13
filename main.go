@@ -50,7 +50,7 @@ func alreadyRunning() (bool, int64) {
 
 		// Attempt to load the pid value
 		if pidBytes, err := ioutil.ReadFile(pidFilename); err == nil {
-			pid, err = strconv.ParseInt(string(pidBytes), 10, 64)
+			pid, _ = strconv.ParseInt(string(pidBytes), 10, 64)
 		}
 	}
 
@@ -67,7 +67,7 @@ func registerCLI() []*cli.Command {
 				fmt.Println("Version:   ", version)
 				fmt.Println("Build Date:", buildDate)
 
-				if state, pid := alreadyRunning(); state == true {
+				if state, pid := alreadyRunning(); state {
 					// Bootstrap Configuration
 					bootstrap.SetupConfiguration()
 					configuration.ReadConfiguration(config)
@@ -81,7 +81,7 @@ func registerCLI() []*cli.Command {
 						return nil
 					}
 
-					return errors.New("Could not retrieve server status page. Check configuration")
+					return errors.New("could not retrieve server status page. check configuration")
 				}
 
 				return nil
@@ -92,7 +92,7 @@ func registerCLI() []*cli.Command {
 			Aliases: []string{"t"},
 			Usage:   "Retrieve status of the service daemon",
 			Action: func(c *cli.Context) error {
-				if state, pid := alreadyRunning(); state == true {
+				if state, pid := alreadyRunning(); state {
 					// Bootstrap Configuration
 					bootstrap.SetupConfiguration()
 					configuration.ReadConfiguration(config)
@@ -107,10 +107,10 @@ func registerCLI() []*cli.Command {
 						return nil
 					}
 
-					return errors.New("Could not retrieve server status page. Check configuration")
+					return errors.New("could not retrieve server status page. check configuration")
 				}
 
-				return errors.New("The service is not currently running")
+				return errors.New("the service is not currently running")
 			},
 		},
 		{
@@ -118,7 +118,7 @@ func registerCLI() []*cli.Command {
 			Aliases: []string{"k"},
 			Usage:   "Terminate service daemon",
 			Action: func(c *cli.Context) error {
-				if state, pid := alreadyRunning(); state == true {
+				if state, pid := alreadyRunning(); state {
 					// Send terminate signal to service
 					// TODO: Implement graceful termination
 					syscall.Kill(int(pid), syscall.SIGTERM)
@@ -133,7 +133,7 @@ func registerCLI() []*cli.Command {
 				// Remove pid file
 				os.Remove(pidFilename)
 
-				return errors.New("The service is not currently running")
+				return errors.New("the service is not currently running")
 			},
 		},
 		{
@@ -161,8 +161,8 @@ func registerCLI() []*cli.Command {
 
 					// I am the parent
 					// Check if pid file exists
-					if state, _ := alreadyRunning(); state == true {
-						err = errors.New("Service already running")
+					if state, _ := alreadyRunning(); state {
+						err = errors.New("service already running")
 					} else {
 						// Fork and get PID
 						pid, err := syscall.ForkExec(os.Args[0], append(os.Args, []string{bootstrap.ConfigDirectory, "CHILD_PROCESS"}...), &syscall.ProcAttr{Files: []uintptr{0, 1, 2}})
@@ -173,7 +173,7 @@ func registerCLI() []*cli.Command {
 
 						// The parent writes PID to file before dying
 						if err := ioutil.WriteFile(pidFilename, []byte(strconv.Itoa(pid)), 0777); err != nil {
-							return errors.New("Could not write pid file")
+							return errors.New("could not write pid file")
 						}
 					}
 				}
@@ -189,34 +189,34 @@ func launchTerminationListener() {
 	signal.Notify(daemonChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		select {
-		case s := <-daemonChan:
-			switch s {
-			// TODO: Implement graceful termination
-			case syscall.SIGINT, syscall.SIGTERM:
-				log.Printf("Received %s signal, exiting", s.String())
+		// Listen/wait for a signal
+		s := <-daemonChan
 
-				// Send kill signal to other services
-				runnerChan <- true
+		switch s {
+		// TODO: Implement graceful termination
+		case syscall.SIGINT, syscall.SIGTERM:
+			log.Printf("Received %s signal, exiting", s.String())
 
-				// Remove pid file
-				os.Remove(pidFilename)
+			// Send kill signal to other services
+			runnerChan <- true
 
-				// Wait a moment before death ☠️
-				time.Sleep(2 * time.Second)
+			// Remove pid file
+			os.Remove(pidFilename)
 
-				// Exit
-				os.Exit(1)
-			}
+			// Wait a moment before death ☠️
+			time.Sleep(2 * time.Second)
+
+			// Exit
+			os.Exit(1)
 		}
 	}()
 }
 
 func launchApp(c *cli.Context) error {
 	// Setup the app
-	var app api.API
+	// var app api.API
 
-	app = &api.Configuration{
+	app := &api.Configuration{
 		Configuration: config,
 		Version:       version,
 		BuildDate:     buildDate,
@@ -226,20 +226,21 @@ func launchApp(c *cli.Context) error {
 	jobs.RefreshConfiguration(config, time.Duration(time.Second*60))
 
 	// We follow this pattern to plan ahead to allow for control and internal status check listeners
-	if success := app.Run(); success == true {
+	if success := app.Run(); success {
 		// Give us a moment to bind to the port, or exit
 		time.Sleep(2 * time.Second)
 
 		log.Println("Service Started. Listening on port " + config.Port)
 
 		// Run forever
+		// TODO: How to fix this? (unnecessary assignment to the blank identifier (S1005))
 		_ = <-runnerChan
 
 		return nil
 	}
 
-	log.Println("Could not launch service")
-	return errors.New("Could not launch service")
+	log.Println("could not launch service")
+	return errors.New("could not launch service")
 }
 
 func main() {

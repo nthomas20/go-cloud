@@ -18,7 +18,7 @@ func rotateLog(logWriter *rotatewriter.RotateWriter, rotateSignal chan (bool)) {
 	for {
 		doRotate := <-rotateSignal
 
-		if doRotate == true && logWriter.RotationInProgress() == false {
+		if doRotate && !logWriter.RotationInProgress() {
 			err := logWriter.Rotate(nil)
 
 			fmt.Println(err)
@@ -30,7 +30,7 @@ func checkLogFileSize(logWriter *rotatewriter.RotateWriter, maxBytes int64, rota
 	for {
 		time.Sleep(10000 * time.Millisecond)
 
-		if logWriter.RotationInProgress() == false {
+		if !logWriter.RotationInProgress() {
 			if fileStat, err := os.Stat(logWriter.Filename); err == nil {
 				fileSize := fileStat.Size()
 

@@ -140,7 +140,7 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		// Correct the Destination header
 		if len(webdavRequest.Header.Get("Destination")) > 0 {
 			// Check if the suffix is the prefix
-			if strings.HasSuffix(webdavRequest.Header.Get("Destination"), prefix) == true || strings.HasSuffix(webdavRequest.Header.Get("Destination")+"/", prefix) == true {
+			if strings.HasSuffix(webdavRequest.Header.Get("Destination"), prefix) || strings.HasSuffix(webdavRequest.Header.Get("Destination")+"/", prefix) {
 				// Deal with the filename move to the root, when Destination is not sent properly (Dolphin, others?)
 				webdavRequest.Header.Set("Destination", webdavRequest.Header.Get("Destination")+"/"+path.Base(filepath))
 			}
@@ -175,7 +175,7 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 			if info, err := handler.FileSystem.Stat(context.TODO(), string(filepath)); err == nil {
 
 				// If it's a file, add the following
-				if info.IsDir() == false {
+				if !info.IsDir() {
 					filename = info.Name()
 
 					ctx.Response.Header.Set(fasthttp.HeaderETag, webdavResponse.Header().Get(fasthttp.HeaderETag))
@@ -189,6 +189,4 @@ func (config *Configuration) webdav(ctx *fasthttp.RequestCtx, params fasthttprou
 		ctx.Response.Header.Add("www-authenticate", `Basic realm=Restricted`)
 		fmt.Println(err)
 	}
-
-	return
 }
